@@ -1,0 +1,5 @@
+node_modules
+.env
+*.log
+db/pets.db
+db/*.db
