@@ -13,8 +13,8 @@ export default function Layout() {
           <nav className="flex gap-6 text-sm">
             <Link to="/" className="text-stone-600 hover:text-teal-600">Главная</Link>
             <Link to="/dogs" className="text-stone-600 hover:text-teal-600">Собаки</Link>
-            <a href="#" className="text-stone-600 hover:text-teal-600">Уход</a>
-            <a href="#" className="text-stone-600 hover:text-teal-600">Здоровье</a>
+            <Link to="/cats" className="text-stone-600 hover:text-teal-600">Кошки</Link>
+            <Link to="/rodents" className="text-stone-600 hover:text-teal-600">Грызуны</Link>
           </nav>
         </div>
       </header>

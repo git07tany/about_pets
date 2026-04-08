@@ -4,7 +4,9 @@
   "type": "module",
   "scripts": {
     "start": "node index.js",
-    "seed": "node db/seed.js"
+    "seed": "node db/seed.js",
+    "seed:cats": "node db/seed-cats.js",
+    "seed:small-pets": "node db/seed-small-pets.js"
   },
   "dependencies": {
     "cors": "^2.8.5",

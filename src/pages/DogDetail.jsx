@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, Dog } from 'lucide-react';
 import DogImage from '../components/DogImage';
+import { dogSizeText } from '../labels';
 
 const API = '/api';
 
@@ -33,12 +34,20 @@ export default function DogDetail() {
   if (loading) return <div className="max-w-3xl mx-auto px-4 py-8"><p className="text-stone-500">Загрузка...</p></div>;
   if (error || !dog) return <div className="max-w-3xl mx-auto px-4 py-8"><p className="text-stone-500">Порода не найдена.</p><Link to="/dogs" className="text-teal-600 hover:underline">← К списку</Link></div>;
 
+  const nutritionText =
+    dog.nutrition && String(dog.nutrition).trim()
+      ? dog.nutrition
+      : 'Полнорационный корм по возрасту и размеру породы, свежая вода всегда в доступе. Порции подбирают по весу и активности. При болезнях и аллергии рацион назначает ветеринар.';
+
   const blocks = [
-    { title: 'Шерсть и уход за ней', text: 'Тип шерсти: ' + dog.coat },
+    { title: 'Шерсть', text: dog.coat },
     { title: 'Характер', text: dog.character_traits },
-    { title: 'Продолжительность жизни', text: `${dog.lifespan_min}–${dog.lifespan_max} лет` },
+    {
+      title: 'Срок жизни',
+      text: `В среднем для этой породы указывают около ${dog.lifespan_min}-${dog.lifespan_max} лет. Реальный срок зависит от линии разведения, генетики, кормления, профилактики и условий содержания.`,
+    },
     { title: 'Активность', text: dog.activity },
-    { title: 'Кормление', text: 'Сбалансированный корм по возрасту и размеру породы. Контроль веса и порций. Точный рацион подбирается с ветеринаром.' },
+    { title: 'Кормление', text: nutritionText },
     { title: 'Уход', text: dog.care },
     { title: 'Здоровье и возможные проблемы', text: dog.health },
   ];
@@ -59,7 +68,7 @@ export default function DogDetail() {
             <Dog className="w-7 h-7 text-teal-600" />
             {dog.name}
           </h1>
-          <p className="text-stone-500 mb-8">Размер: {dog.size}</p>
+          <p className="text-stone-500 mb-8">Размер: {dogSizeText(dog.size)}</p>
 
           <div className="space-y-6">
             {blocks.map((block) => (

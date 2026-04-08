@@ -15,14 +15,14 @@ export default function Home() {
       text: 'Породы, уход, питание и здоровье',
       img: '/images/cat.jpg',
       icon: Cat,
-      link: '#',
+      link: '/cats',
     },
     {
       name: 'Грызуны',
-      text: 'Хомяки, морские свинки, кролики и уход',
+      text: 'Хомяки, крысы, свинки, кролики - уход и здоровье',
       img: '/images/rabbit.jpg',
       icon: Rat,
-      link: '#',
+      link: '/rodents',
     },
   ];
 

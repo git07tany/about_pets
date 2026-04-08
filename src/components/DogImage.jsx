@@ -1,27 +1,34 @@
-import { useState } from 'react';
+import { useLayoutEffect, useState } from 'react';
 
-// Фото только из папки public/images/dogs/ — имена файлов: 1.jpg, 2.jpg, … 20.jpg
-const PLACEHOLDER = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect fill="#f5f5f4" width="200" height="200"/><text x="50%" y="50%" fill="#a8a29e" font-family="sans-serif" font-size="14" text-anchor="middle" dy=".3em">Нет фото</text></svg>');
+const PH =
+  'data:image/svg+xml,' +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect fill="#f5f5f4" width="200" height="200"/><text x="50%" y="50%" fill="#a8a29e" font-family="sans-serif" font-size="14" text-anchor="middle" dy=".3em">Нет фото</text></svg>'
+  );
+
+function pubUrl(raw) {
+  if (raw == null || typeof raw !== 'string') return '';
+  const t = raw.trim();
+  if (!t) return '';
+  if (/^https?:\/\//i.test(t)) return t;
+  return t.startsWith('/') ? t : '/' + t;
+}
 
 export default function DogImage({ dog, className }) {
-  const id = dog?.id != null ? String(dog.id) : '';
-  const [step, setStep] = useState(0); // 0 = jpg, 1 = png, 2 = заглушка
+  const src = pubUrl(dog && dog.image_url);
+  const [bad, setBad] = useState(false);
 
-  const src =
-    step === 0 ? `/images/dogs/${id}.jpg` :
-    step === 1 ? `/images/dogs/${id}.png` :
-    PLACEHOLDER;
+  useLayoutEffect(() => {
+    setBad(false);
+  }, [src]);
 
-  const onError = () => setStep((s) => (s < 2 ? s + 1 : s));
+  if (!src || bad) {
+    return <img src={PH} alt="" className={className} />;
+  }
 
-  if (!id) return <img src={PLACEHOLDER} alt="" className={className} />;
+  const name = dog && dog.name ? dog.name : '';
 
   return (
-    <img
-      src={src}
-      alt={dog?.name ?? ''}
-      className={className}
-      onError={onError}
-    />
+    <img src={src} alt={name} className={className} onError={() => setBad(true)} />
   );
 }

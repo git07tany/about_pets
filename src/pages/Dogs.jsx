@@ -1,48 +1,140 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Filter, Dog } from 'lucide-react';
+import { Search, Filter, Dog, X } from 'lucide-react';
 import DogImage from '../components/DogImage';
+import FilterDrop from '../components/FilterDrop';
+import { dogSizeText } from '../labels';
 
 const API = '/api';
 
+const DEF_SIZES = ['мелкий', 'средний', 'крупный'];
+const DEF_ACTS = ['низкая', 'средняя', 'высокая'];
+const DEF_COATS = ['Короткая', 'Полудлинная', 'Длинная', 'Бесшёрстная'];
+const DEF_AGE = [
+  { value: '6-8', label: '6-8 лет' },
+  { value: '9-10', label: '9-10 лет' },
+  { value: '10-12', label: '10-12 лет' },
+  { value: '12-14', label: '12-14 лет' },
+  { value: '14-16', label: '14-16 лет' },
+  { value: '16+', label: '16 лет и более' },
+];
+
+function norm(s) {
+  return String(s || '')
+    .normalize('NFC')
+    .toLowerCase();
+}
+
 export default function Dogs() {
   const [list, setList] = useState([]);
-  const [filters, setFilters] = useState({ sizes: [], activities: [], coats: [] });
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [sizeFilter, setSizeFilter] = useState('');
-  const [activityFilter, setActivityFilter] = useState('');
-  const [coatFilter, setCoatFilter] = useState('');
-  const [showFilter, setShowFilter] = useState(false);
-  const [error, setError] = useState(false);
+  const [meta, setMeta] = useState({
+    sizes: [],
+    activities: [],
+    coats: [],
+    lifespanBuckets: [],
+  });
+  const [busy, setBusy] = useState(true);
+  const [q, setQ] = useState('');
+  const [sz, setSz] = useState('');
+  const [act, setAct] = useState('');
+  const [coat, setCoat] = useState('');
+  const [age, setAge] = useState('');
+  const [panel, setPanel] = useState(false);
+  const [menu, setMenu] = useState(null);
+  const [bad, setBad] = useState(false);
+  const [metaBusy, setMetaBusy] = useState(true);
+  const [metaBad, setMetaBad] = useState(false);
+
+  const szList = meta.sizes.length > 0 ? meta.sizes : DEF_SIZES;
+  const sizeOpts = szList.map((s) => ({ value: s, label: dogSizeText(s) }));
+
+  const actList = meta.activities.length > 0 ? meta.activities : DEF_ACTS;
+  const actOpts = actList.map((a) => ({ value: a, label: a }));
+
+  const coatList = meta.coats.length > 0 ? meta.coats : DEF_COATS;
+  const coatOpts = coatList.map((c) => ({ value: c, label: c }));
+
+  let ageOpts;
+  if (meta.lifespanBuckets.length > 0) {
+    ageOpts = meta.lifespanBuckets.map((x) => ({ value: x.value, label: x.label }));
+  } else {
+    ageOpts = DEF_AGE;
+  }
 
   useEffect(() => {
+    setMetaBusy(true);
+    setMetaBad(false);
     fetch(API + '/dogs/filters')
-      .then((res) => res.json())
-      .then((data) => setFilters(data))
-      .catch(() => setFilters({ sizes: [], activities: [], coats: [] }));
+      .then((res) => {
+        if (!res.ok) throw new Error('x');
+        return res.json();
+      })
+      .then((data) => {
+        if (data && !data.error) {
+          setMeta({
+            sizes: data.sizes || [],
+            activities: data.activities || [],
+            coats: data.coats || [],
+            lifespanBuckets: data.lifespanBuckets || [],
+          });
+        } else {
+          setMetaBad(true);
+        }
+      })
+      .catch(() => {
+        setMetaBad(true);
+        setMeta({
+          sizes: [],
+          activities: [],
+          coats: [],
+          lifespanBuckets: [],
+        });
+      })
+      .finally(() => setMetaBusy(false));
   }, []);
 
   useEffect(() => {
-    setLoading(true);
-    const params = new URLSearchParams();
-    if (search.trim()) params.set('search', search.trim());
-    if (sizeFilter) params.set('size', sizeFilter);
-    if (activityFilter) params.set('activity', activityFilter);
-    if (coatFilter.trim()) params.set('coat', coatFilter.trim());
-    setError(false);
-    fetch(API + '/dogs?' + params.toString())
+    setBusy(true);
+    const p = new URLSearchParams();
+    if (sz) p.set('size', sz);
+    if (act) p.set('activity', act);
+    if (coat.trim()) p.set('coat', coat.trim());
+    if (age) p.set('lifespan', age);
+    setBad(false);
+    fetch(API + '/dogs?' + p.toString())
       .then((res) => res.json())
       .then((data) => {
         setList(Array.isArray(data) ? data : []);
-        setLoading(false);
+        setBusy(false);
       })
       .catch(() => {
         setList([]);
-        setError(true);
-        setLoading(false);
+        setBad(true);
+        setBusy(false);
       });
-  }, [search, sizeFilter, activityFilter, coatFilter]);
+  }, [sz, act, coat, age]);
+
+  let shown = list;
+  const qq = q.trim();
+  if (qq) {
+    const needle = norm(qq);
+    shown = list.filter((d) => norm(d.name).includes(needle));
+  }
+
+  let nActive = 0;
+  if (sz) nActive++;
+  if (act) nActive++;
+  if (coat.trim()) nActive++;
+  if (age) nActive++;
+
+  function reset() {
+    setSz('');
+    setAct('');
+    setCoat('');
+    setAge('');
+  }
+
+  const emptySearch = !busy && !bad && list.length > 0 && shown.length === 0;
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
@@ -51,82 +143,121 @@ export default function Dogs() {
         Породы собак
       </h1>
 
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+      <div className="flex flex-col sm:flex-row gap-3 mb-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-400" />
           <input
             type="text"
-            placeholder="Поиск по названию породы..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            autoComplete="off"
+            placeholder="Начните вводить название породы..."
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+            aria-label="Поиск по названию породы"
           />
         </div>
         <button
           type="button"
-          onClick={() => setShowFilter(!showFilter)}
-          className="flex items-center justify-center gap-2 px-4 py-2.5 border border-stone-200 rounded-xl bg-white hover:bg-stone-50"
+          onClick={() => {
+            setMenu(null);
+            setPanel(!panel);
+          }}
+          className="flex items-center justify-center gap-2 px-4 py-2.5 border border-stone-200 rounded-xl bg-white hover:bg-stone-50 shrink-0"
         >
           <Filter className="w-5 h-5" />
-          Фильтр
+          Характеристики
+          {nActive > 0 && (
+            <span className="min-w-[1.25rem] h-5 px-1 rounded-full bg-teal-600 text-white text-xs font-semibold flex items-center justify-center">
+              {nActive}
+            </span>
+          )}
         </button>
       </div>
 
-      {showFilter && (
-        <div className="p-4 bg-white border border-stone-200 rounded-xl mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1">Размер</label>
-            <select
-              value={sizeFilter}
-              onChange={(e) => setSizeFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-stone-200 rounded-lg"
-            >
-              <option value="">Все</option>
-              {filters.sizes?.map((s) => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
+      {panel && (
+        <div className="p-4 bg-white border border-stone-200 rounded-xl mb-6 space-y-4 overflow-visible">
+          {metaBusy && <p className="text-sm text-stone-600">Загрузка вариантов фильтров…</p>}
+          {metaBad && !metaBusy && (
+            <p className="text-sm text-amber-800 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
+              Не удалось получить список вариантов с сервера. Проверьте, что запущен backend (папка server,{' '}
+              <code className="text-xs bg-amber-100/80 px-1 rounded">npm start</code>
+              ). Размер и активность доступны для выбора; шерсть и срок жизни появятся после успешной загрузки.
+            </p>
+          )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 overflow-visible min-w-0">
+            <FilterDrop
+              menuId="size"
+              openMenu={menu}
+              setOpenMenu={setMenu}
+              label="Размер"
+              value={sz}
+              placeholder="Все размеры"
+              options={sizeOpts}
+              onChange={setSz}
+              disabled={false}
+            />
+            <FilterDrop
+              menuId="activity"
+              openMenu={menu}
+              setOpenMenu={setMenu}
+              label="Активность"
+              value={act}
+              placeholder="Любая активность"
+              options={actOpts}
+              onChange={setAct}
+              disabled={false}
+            />
+            <FilterDrop
+              menuId="coat"
+              openMenu={menu}
+              setOpenMenu={setMenu}
+              label="Тип шерсти"
+              value={coat}
+              placeholder={coatOpts.length ? 'Все типы' : 'Нет данных из БД'}
+              options={coatOpts}
+              onChange={setCoat}
+              disabled={!coatOpts.length}
+            />
+            <FilterDrop
+              menuId="lifespan"
+              openMenu={menu}
+              setOpenMenu={setMenu}
+              label="Срок жизни"
+              value={age}
+              placeholder="Любой срок"
+              options={ageOpts}
+              onChange={setAge}
+              disabled={false}
+            />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1">Активность</label>
-            <select
-              value={activityFilter}
-              onChange={(e) => setActivityFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-stone-200 rounded-lg"
+          {nActive > 0 && (
+            <button
+              type="button"
+              onClick={reset}
+              className="inline-flex items-center gap-1.5 text-sm text-teal-700 hover:text-teal-900 font-medium"
             >
-              <option value="">Все</option>
-              {filters.activities?.map((a) => (
-                <option key={a} value={a}>{a}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1">Тип шерсти</label>
-            <select
-              value={coatFilter}
-              onChange={(e) => setCoatFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-stone-200 rounded-lg"
-            >
-              <option value="">Все</option>
-              {filters.coats?.map((c) => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
-          </div>
+              <X className="w-4 h-4" />
+              Сбросить характеристики
+            </button>
+          )}
         </div>
       )}
 
-      {loading ? (
+      {busy ? (
         <p className="text-stone-500 text-center py-8">Загрузка...</p>
-      ) : error ? (
+      ) : bad ? (
         <p className="text-amber-700 bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
           Не удалось загрузить данные. Убедись, что запущен сервер (из папки server: npm start).
         </p>
-      ) : list.length === 0 ? (
-        <p className="text-stone-500 text-center py-8">Ни одной породы не найдено. Измените поиск или фильтры.</p>
+      ) : shown.length === 0 ? (
+        <p className="text-stone-500 text-center py-8">
+          {emptySearch
+            ? 'По названию ничего не найдено. Измените запрос или сбросьте фильтры.'
+            : 'Ни одной породы не найдено. Измените фильтры по характеристикам.'}
+        </p>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-          {list.map((dog) => (
+          {shown.map((dog) => (
             <Link
               key={dog.id}
               to={'/dogs/' + dog.id}
@@ -135,11 +266,12 @@ export default function Dogs() {
                 <DogImage
                   key={dog.id}
                   dog={dog}
-                  className="max-w-full max-h-full w-full h-full object-contain group-hover:scale-105 transition duration-300"/>
+                  className="max-w-full max-h-full w-full h-full object-contain group-hover:scale-105 transition duration-300"
+                />
               </div>
               <div className="p-3 text-center">
                 <h3 className="font-semibold text-stone-900 group-hover:text-teal-600">{dog.name}</h3>
-                <p className="text-sm text-stone-500">{dog.size}</p>
+                <p className="text-sm text-stone-500">{dogSizeText(dog.size)}</p>
               </div>
             </Link>
           ))}
