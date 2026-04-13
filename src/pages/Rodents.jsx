@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Search, Rabbit } from 'lucide-react';
 import SmallPetImage from '../components/SmallPetImage';
 import { speciesText, careText } from '../labels';
+import { useListScrollRestoration } from '../hooks/useListScrollRestoration';
 
 const API = '/api';
 
@@ -35,6 +36,8 @@ export default function Rodents() {
   const [q, setQ] = useState('');
   const [sp, setSp] = useState('');
   const [cr, setCr] = useState('');
+
+  useListScrollRestoration('pets:scroll:/rodents', !busy);
 
   useEffect(() => {
     setBusy(true);
@@ -127,7 +130,7 @@ export default function Rodents() {
       ) : shown.length === 0 ? (
         <p className="text-stone-500 text-center py-8">Ничего не найдено. Измените фильтры или поиск.</p>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {shown.map((pet) => (
             <Link
               key={pet.id}

@@ -1,15 +1,18 @@
 import { useLayoutEffect, useState } from 'react';
 
+// запасная картинка если ни один источник не сработал
 const PH =
   'data:image/svg+xml,' +
   encodeURIComponent(
     '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect fill="#f5f5f4" width="200" height="200"/><text x="50%" y="50%" fill="#a8a29e" font-family="sans-serif" font-size="14" text-anchor="middle" dy=".3em">Нет фото</text></svg>'
   );
 
+// все файлы из папки assets cats на этапе сборки кладём в объект
 const fromAssets = import.meta.glob('../assets/cats/*.{jpg,jpeg,png,webp}', {
   eager: true,
 });
 
+// номер в имени файла это id породы чтобы быстро найти url из бандла
 const byId = {};
 for (const path in fromAssets) {
   const m = path.match(/(\d+)\.(jpg|jpeg|png|webp)$/i);
@@ -22,6 +25,7 @@ for (const path in fromAssets) {
   }
 }
 
+// порядок попыток сначала vite asset потом public jpg png потом заглушка
 function urlsFor(id) {
   if (!id) return [PH];
   const out = [];
@@ -39,10 +43,12 @@ export default function CatImage({ cat, className }) {
   const urls = urlsFor(id);
   const src = urls[i];
 
+  // другая кошка начинаем снова с первого url
   useLayoutEffect(() => {
     setI(0);
   }, [id]);
 
+  // on error берём следующий кандидат в списке
   function onBad() {
     if (i < urls.length - 1) {
       setI(i + 1);

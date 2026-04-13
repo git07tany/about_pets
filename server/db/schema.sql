@@ -1,58 +1,71 @@
-CREATE TABLE IF NOT EXISTS dog_breeds (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  name TEXT NOT NULL,
-  size TEXT NOT NULL CHECK(size IN ('мелкий','средний','крупный')),
-  coat TEXT NOT NULL,
-  character_traits TEXT NOT NULL,
-  lifespan_min INTEGER NOT NULL,
-  lifespan_max INTEGER NOT NULL,
-  activity TEXT NOT NULL CHECK(activity IN ('низкая','средняя','высокая')),
-  care TEXT NOT NULL,
-  nutrition TEXT NOT NULL DEFAULT '',
-  health TEXT NOT NULL,
-  image_url TEXT,
-  created_at TEXT DEFAULT (datetime('now'))
+-- собаки
+-- id - порядковый номер в таблице, база сама ставит следующий
+-- coat - про шерсть (короткая, длинная и т.п.).
+-- character_traits - характер, поведение одной строкой.
+-- lifespan_min, lifespan_max - сколько живут
+-- created_at - когда запись добавили (время от базы)
+
+create table if not exists dog_breeds (
+  id integer primary key autoincrement,
+  name text not null,
+  size text not null check(size in ('мелкий','средний','крупный')),
+  coat text not null,
+  character_traits text not null,
+  lifespan_min integer not null,
+  lifespan_max integer not null,
+  activity text not null check(activity in ('низкая','средняя','высокая')),
+  care text not null,
+  nutrition text not null default '',
+  health text not null,
+  image_url text,
+  created_at text default (datetime('now'))
 );
 
-CREATE INDEX IF NOT EXISTS idx_dog_name ON dog_breeds(name);
-CREATE INDEX IF NOT EXISTS idx_dog_size ON dog_breeds(size);
-CREATE INDEX IF NOT EXISTS idx_dog_activity ON dog_breeds(activity);
+-- индексы - чтобы по имени, размеру и активности быстрее искать
+create index if not exists idx_dog_name on dog_breeds(name);
+create index if not exists idx_dog_size on dog_breeds(size);
+create index if not exists idx_dog_activity on dog_breeds(activity);
 
-CREATE TABLE IF NOT EXISTS cat_breeds (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  name TEXT NOT NULL,
-  size TEXT NOT NULL CHECK(size IN ('мелкий','средний','крупный')),
-  coat TEXT NOT NULL,
-  cover_type TEXT NOT NULL,
-  character_traits TEXT NOT NULL,
-  lifespan_min INTEGER NOT NULL,
-  lifespan_max INTEGER NOT NULL,
-  activity TEXT NOT NULL CHECK(activity IN ('низкая','средняя','высокая')),
-  nutrition TEXT NOT NULL,
-  care TEXT NOT NULL,
-  health TEXT NOT NULL,
-  image_url TEXT,
-  created_at TEXT DEFAULT (datetime('now'))
+-- кошки 
+
+
+create table if not exists cat_breeds (
+  id integer primary key autoincrement,
+  name text not null,
+  size text not null check(size in ('мелкий','средний','крупный')),
+  coat text not null,
+  cover_type text not null,
+  character_traits text not null,
+  lifespan_min integer not null,
+  lifespan_max integer not null,
+  activity text not null check(activity in ('низкая','средняя','высокая')),
+  nutrition text not null,
+  care text not null,
+  health text not null,
+  image_url text,
+  created_at text default (datetime('now'))
 );
 
-CREATE INDEX IF NOT EXISTS idx_cat_name ON cat_breeds(name);
-CREATE INDEX IF NOT EXISTS idx_cat_size ON cat_breeds(size);
-CREATE INDEX IF NOT EXISTS idx_cat_activity ON cat_breeds(activity);
+create index if not exists idx_cat_name on cat_breeds(name);
+create index if not exists idx_cat_size on cat_breeds(size);
+create index if not exists idx_cat_activity on cat_breeds(activity);
 
-CREATE TABLE IF NOT EXISTS small_pet_breeds (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  name TEXT NOT NULL,
-  species TEXT NOT NULL CHECK(species IN ('хомяк','крыса','мышь','морская свинка','кролик')),
-  care_level TEXT NOT NULL CHECK(care_level IN ('лёгкий','средний','сложный')),
-  lifespan_min INTEGER NOT NULL,
-  lifespan_max INTEGER NOT NULL,
-  nutrition TEXT NOT NULL,
-  care TEXT NOT NULL,
-  health TEXT NOT NULL,
-  image_url TEXT,
-  created_at TEXT DEFAULT (datetime('now'))
+--  мелкие животные 
+
+create table if not exists small_pet_breeds (
+  id integer primary key autoincrement,
+  name text not null,
+  species text not null check(species in ('хомяк','крыса','мышь','морская свинка','кролик')),
+  care_level text not null check(care_level in ('лёгкий','средний','сложный')),
+  lifespan_min integer not null,
+  lifespan_max integer not null,
+  nutrition text not null,
+  care text not null,
+  health text not null,
+  image_url text,
+  created_at text default (datetime('now'))
 );
 
-CREATE INDEX IF NOT EXISTS idx_small_pet_name ON small_pet_breeds(name);
-CREATE INDEX IF NOT EXISTS idx_small_pet_species ON small_pet_breeds(species);
-CREATE INDEX IF NOT EXISTS idx_small_pet_care ON small_pet_breeds(care_level);
+create index if not exists idx_small_pet_name on small_pet_breeds(name);
+create index if not exists idx_small_pet_species on small_pet_breeds(species);
+create index if not exists idx_small_pet_care on small_pet_breeds(care_level);

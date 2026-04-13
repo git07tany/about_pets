@@ -3,12 +3,13 @@ import { Link } from 'react-router-dom';
 import { Search, Filter, Cat, X } from 'lucide-react';
 import CatImage from '../components/CatImage';
 import FilterDrop from '../components/FilterDrop';
+import { useListScrollRestoration } from '../hooks/useListScrollRestoration';
 
 const API = '/api';
 
 const DEF_SIZES = ['мелкий', 'средний', 'крупный'];
 const DEF_ACTS = ['низкая', 'средняя', 'высокая'];
-const DEF_COATS = ['Короткая', 'Полудлинная', 'Длинная', 'Бесшёрстная'];
+const DEF_COATS = ['короткая', 'полудлинная', 'длинная', 'бесшёрстная'];
 
 function norm(s) {
   return String(s || '')
@@ -35,6 +36,8 @@ export default function Cats() {
   const [bad, setBad] = useState(false);
   const [metaBusy, setMetaBusy] = useState(true);
   const [metaBad, setMetaBad] = useState(false);
+
+  useListScrollRestoration('pets:scroll:/cats', !busy);
 
   const szList = meta.sizes.length > 0 ? meta.sizes : DEF_SIZES;
   const sizeOpts = szList.map((s) => ({ value: s, label: s }));
@@ -245,7 +248,7 @@ export default function Cats() {
             : 'Ни одной породы не найдено. Измените фильтры по характеристикам.'}
         </p>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {shown.map((cat) => (
             <Link
               key={cat.id}

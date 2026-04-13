@@ -2,6 +2,7 @@ import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronDown } from 'lucide-react';
 
+// выпадашка фильтра список рисуем порталом в body чтобы не обрезало overflow родителя
 export default function FilterDrop({
   menuId,
   openMenu,
@@ -18,6 +19,7 @@ export default function FilterDrop({
   const listRef = useRef(null);
   const [box, setBox] = useState({ top: 0, left: 0, width: 0 });
 
+  // позиция списка под кнопкой пересчитываем при скролле окна и ресайзе
   useLayoutEffect(() => {
     if (!open || !btnRef.current) return;
     function move() {
@@ -35,6 +37,7 @@ export default function FilterDrop({
     };
   }, [open]);
 
+  // клик мимо кнопки и мимо списка закрывает меню
   useEffect(() => {
     if (!open) return;
     function closeIfOutside(e) {
@@ -48,6 +51,7 @@ export default function FilterDrop({
     return () => document.removeEventListener('mousedown', closeIfOutside);
   }, [open, setOpenMenu]);
 
+  // что показать на кнопке если выбрано ищем label в options иначе сырой value
   let cap = null;
   if (value) {
     for (let i = 0; i < options.length; i++) {
@@ -59,6 +63,7 @@ export default function FilterDrop({
     if (cap === null) cap = value;
   }
 
+  // сам список в document body координаты fixed из getBoundingClientRect
   const portal =
     open &&
     createPortal(

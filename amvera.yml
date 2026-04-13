@@ -1,0 +1,15 @@
+# Развёртывание на Amvera Cloud: https://docs.amvera.ru/applications/environments/nodejs-server.html
+
+meta:
+  environment: node
+  toolchain:
+    name: npm
+    version: 20
+
+build:
+  # Сначала выполняется npm install в корне, затем эти команды:
+  additionalCommands: cd server && npm install && npm run db:bundle && cd .. && npm run build
+
+run:
+  scriptName: server/index.js
+  containerPort: 3001

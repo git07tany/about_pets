@@ -7,6 +7,7 @@ import Cats from './pages/Cats';
 import CatDetail from './pages/CatDetail';
 import Rodents from './pages/Rodents';
 import RodentDetail from './pages/RodentDetail';
+import NotFound from './pages/NotFound';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
           <Route path="cats/:id" element={<CatDetail />} />
           <Route path="rodents" element={<Rodents />} />
           <Route path="rodents/:id" element={<RodentDetail />} />
+          <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
     </BrowserRouter>

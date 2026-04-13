@@ -4,6 +4,7 @@ import { Search, Filter, Dog, X } from 'lucide-react';
 import DogImage from '../components/DogImage';
 import FilterDrop from '../components/FilterDrop';
 import { dogSizeText } from '../labels';
+import { useListScrollRestoration } from '../hooks/useListScrollRestoration';
 
 const API = '/api';
 
@@ -44,6 +45,8 @@ export default function Dogs() {
   const [bad, setBad] = useState(false);
   const [metaBusy, setMetaBusy] = useState(true);
   const [metaBad, setMetaBad] = useState(false);
+
+  useListScrollRestoration('pets:scroll:/dogs', !busy);
 
   const szList = meta.sizes.length > 0 ? meta.sizes : DEF_SIZES;
   const sizeOpts = szList.map((s) => ({ value: s, label: dogSizeText(s) }));
@@ -256,7 +259,7 @@ export default function Dogs() {
             : 'Ни одной породы не найдено. Измените фильтры по характеристикам.'}
         </p>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {shown.map((dog) => (
             <Link
               key={dog.id}

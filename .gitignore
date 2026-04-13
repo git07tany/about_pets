@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Временные артефакты документации (распакованный docx, архивы курсовой)
+_docx_extract/
+_coursework.zip
