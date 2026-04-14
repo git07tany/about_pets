@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useLocation } from "react-router-dom";
 import { ArrowLeft, Dog } from "lucide-react";
 import DogImage from "../components/DogImage";
 import { dogSizeText } from "../labels";
@@ -8,6 +8,11 @@ const apiBase = "/api";
 
 export default function DogDetail() {
   const { id } = useParams();
+  const location = useLocation();
+  const listBack =
+    typeof location.state?.listReturn === "string"
+      ? location.state.listReturn
+      : "/dogs";
   const [dog, setDog] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -41,7 +46,7 @@ export default function DogDetail() {
     return (
       <div className="max-w-3xl mx-auto px-4 py-8">
         <p className="text-stone-500">Порода не найдена.</p>
-        <Link to="/dogs" className="text-teal-600 hover:underline">
+        <Link to={listBack} className="text-teal-600 hover:underline">
           ← К списку
         </Link>
       </div>
@@ -68,7 +73,7 @@ export default function DogDetail() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
       <Link
-        to="/dogs"
+        to={listBack}
         className="inline-flex items-center gap-1 text-stone-600 hover:text-teal-600 text-sm mb-6"
       >
         <ArrowLeft className="w-4 h-4" />К списку пород

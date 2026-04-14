@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect, useCallback } from "react";
+import { Link, useSearchParams, useLocation } from "react-router-dom";
 import { Search, Filter, Dog, X } from "lucide-react";
 import DogImage from "../components/DogImage";
 import FilterDrop from "../components/FilterDrop";
@@ -27,6 +27,33 @@ function norm(s) {
 }
 
 export default function Dogs() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
+
+  const q = searchParams.get("q") ?? "";
+  const sz = searchParams.get("size") ?? "";
+  const act = searchParams.get("activity") ?? "";
+  const coat = searchParams.get("coat") ?? "";
+  const age = searchParams.get("lifespan") ?? "";
+
+  const patchSearch = useCallback(
+    (updates) => {
+      setSearchParams(
+        (prev) => {
+          const p = new URLSearchParams(prev);
+          for (const [key, val] of Object.entries(updates)) {
+            const s = val == null ? "" : String(val);
+            if (!s.trim()) p.delete(key);
+            else p.set(key, s.trim());
+          }
+          return p;
+        },
+        { replace: true },
+      );
+    },
+    [setSearchParams],
+  );
+
   const [list, setList] = useState([]);
   const [meta, setMeta] = useState({
     sizes: [],
@@ -35,11 +62,6 @@ export default function Dogs() {
     lifespanBuckets: [],
   });
   const [busy, setBusy] = useState(true);
-  const [q, setQ] = useState("");
-  const [sz, setSz] = useState("");
-  const [act, setAct] = useState("");
-  const [coat, setCoat] = useState("");
-  const [age, setAge] = useState("");
   const [panel, setPanel] = useState(false);
   const [menu, setMenu] = useState(null);
   const [bad, setBad] = useState(false);
@@ -47,6 +69,8 @@ export default function Dogs() {
   const [metaBad, setMetaBad] = useState(false);
 
   useListScrollRestoration("pets:scroll:/dogs", !busy);
+
+  const listReturnPath = `${location.pathname}${location.search}`;
 
   const szList = meta.sizes.length > 0 ? meta.sizes : defSizes;
   const sizeOpts = szList.map((s) => ({ value: s, label: dogSizeText(s) }));
@@ -134,10 +158,12 @@ export default function Dogs() {
   if (age) nActive++;
 
   function reset() {
-    setSz("");
-    setAct("");
-    setCoat("");
-    setAge("");
+    patchSearch({
+      size: "",
+      activity: "",
+      coat: "",
+      lifespan: "",
+    });
   }
 
   const emptySearch = !busy && !bad && list.length > 0 && shown.length === 0;
@@ -156,8 +182,8 @@ export default function Dogs() {
             type="text"
             autoComplete="off"
             placeholder="Начните вводить название породы..."
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
+                       value={q}
+            onChange={(e) => patchSearch({ q: e.target.value })}
             className="w-full pl-10 pr-4 py-2.5 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
             aria-label="Поиск по названию породы"
           />
@@ -207,7 +233,7 @@ export default function Dogs() {
               value={sz}
               placeholder="Все размеры"
               options={sizeOpts}
-              onChange={setSz}
+              onChange={(v) => patchSearch({ size: v })}
               disabled={false}
             />
             <FilterDrop
@@ -218,7 +244,7 @@ export default function Dogs() {
               value={act}
               placeholder="Любая активность"
               options={actOpts}
-              onChange={setAct}
+              onChange={(v) => patchSearch({ activity: v })}
               disabled={false}
             />
             <FilterDrop
@@ -229,7 +255,7 @@ export default function Dogs() {
               value={coat}
               placeholder={coatOpts.length ? "Все типы" : "Нет данных из БД"}
               options={coatOpts}
-              onChange={setCoat}
+              onChange={(v) => patchSearch({ coat: v })}
               disabled={!coatOpts.length}
             />
             <FilterDrop
@@ -240,7 +266,7 @@ export default function Dogs() {
               value={age}
               placeholder="Любой срок"
               options={ageOpts}
-              onChange={setAge}
+              onChange={(v) => patchSearch({ lifespan: v })}
               disabled={false}
             />
           </div>
@@ -276,6 +302,7 @@ export default function Dogs() {
             <Link
               key={dog.id}
               to={"/dogs/" + dog.id}
+              state={{ listReturn: listReturnPath }}
               className="group block bg-white rounded-xl border border-stone-200 overflow-hidden shadow-sm hover:shadow-md hover:border-teal-200 transition"
             >
               <div className="h-52 sm:h-56 flex items-center justify-center overflow-hidden bg-stone-100">

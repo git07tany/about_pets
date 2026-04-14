@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect, useCallback } from "react";
+import { Link, useSearchParams, useLocation } from "react-router-dom";
 import { Search, Rabbit } from "lucide-react";
 import SmallPetImage from "../components/SmallPetImage";
 import { speciesText, careText } from "../labels";
@@ -30,14 +30,38 @@ function norm(s) {
 }
 
 export default function Rodents() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
+
+  const q = searchParams.get("q") ?? "";
+  const sp = searchParams.get("species") ?? "";
+  const cr = searchParams.get("care") ?? "";
+
+  const patchSearch = useCallback(
+    (updates) => {
+      setSearchParams(
+        (prev) => {
+          const p = new URLSearchParams(prev);
+          for (const [key, val] of Object.entries(updates)) {
+            const s = val == null ? "" : String(val);
+            if (!s.trim()) p.delete(key);
+            else p.set(key, s.trim());
+          }
+          return p;
+        },
+        { replace: true },
+      );
+    },
+    [setSearchParams],
+  );
+
   const [list, setList] = useState([]);
   const [busy, setBusy] = useState(true);
   const [bad, setBad] = useState(false);
-  const [q, setQ] = useState("");
-  const [sp, setSp] = useState("");
-  const [cr, setCr] = useState("");
 
   useListScrollRestoration("pets:scroll:/rodents", !busy);
+
+  const listReturnPath = `${location.pathname}${location.search}`;
 
   useEffect(() => {
     setBusy(true);
@@ -84,7 +108,7 @@ export default function Rodents() {
             autoComplete="off"
             placeholder="Поиск по названию..."
             value={q}
-            onChange={(e) => setQ(e.target.value)}
+            onChange={(e) => patchSearch({ q: e.target.value })}
             className="w-full pl-10 pr-4 py-2.5 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500"
           />
         </div>
@@ -94,7 +118,7 @@ export default function Rodents() {
             Вид животного
             <select
               value={sp}
-              onChange={(e) => setSp(e.target.value)}
+              onChange={(e) => patchSearch({ species: e.target.value })}
               className="w-full px-3 py-2.5 border border-stone-200 rounded-lg bg-white text-stone-900 focus:ring-2 focus:ring-teal-500 focus:outline-none"
             >
               {speciesOptions.map((o) => (
@@ -109,7 +133,7 @@ export default function Rodents() {
             Сложность ухода
             <select
               value={cr}
-              onChange={(e) => setCr(e.target.value)}
+              onChange={(e) => patchSearch({ care: e.target.value })}
               className="w-full px-3 py-2.5 border border-stone-200 rounded-lg bg-white text-stone-900 focus:ring-2 focus:ring-teal-500 focus:outline-none"
             >
               {careOptions.map((o) => (
@@ -142,6 +166,7 @@ export default function Rodents() {
             <Link
               key={pet.id}
               to={"/rodents/" + pet.id}
+              state={{ listReturn: listReturnPath }}
               className="group block bg-white rounded-xl border border-stone-200 overflow-hidden shadow-sm hover:shadow-md hover:border-teal-200 transition"
             >
               <div className="h-48 sm:h-52 flex items-center justify-center overflow-hidden bg-stone-100">

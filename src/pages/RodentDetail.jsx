@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useLocation } from "react-router-dom";
 import { ArrowLeft, Rabbit } from "lucide-react";
 import SmallPetImage from "../components/SmallPetImage";
 import { careText } from "../labels";
@@ -43,7 +43,7 @@ export default function RodentDetail() {
     return (
       <div className="max-w-3xl mx-auto px-4 py-8">
         <p className="text-stone-500">Карточка не найдена.</p>
-        <Link to="/rodents" className="text-teal-600 hover:underline">
+        <Link to={listBack} className="text-teal-600 hover:underline">
           Назад к списку
         </Link>
       </div>
@@ -63,7 +63,7 @@ export default function RodentDetail() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
       <Link
-        to="/rodents"
+        to={listBack}
         className="inline-flex items-center gap-1 text-stone-600 hover:text-teal-600 text-sm mb-6"
       >
         <ArrowLeft className="w-4 h-4" />К списку

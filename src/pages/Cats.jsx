@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect, useCallback } from "react";
+import { Link, useSearchParams, useLocation } from "react-router-dom";
 import { Search, Filter, Cat, X } from "lucide-react";
 import CatImage from "../components/CatImage";
 import FilterDrop from "../components/FilterDrop";
@@ -18,6 +18,33 @@ function norm(s) {
 }
 
 export default function Cats() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
+
+  const q = searchParams.get("q") ?? "";
+  const sz = searchParams.get("size") ?? "";
+  const act = searchParams.get("activity") ?? "";
+  const coat = searchParams.get("coat") ?? "";
+  const years = searchParams.get("minYears") ?? "";
+
+  const patchSearch = useCallback(
+    (updates) => {
+      setSearchParams(
+        (prev) => {
+          const p = new URLSearchParams(prev);
+          for (const [key, val] of Object.entries(updates)) {
+            const s = val == null ? "" : String(val);
+            if (!s.trim()) p.delete(key);
+            else p.set(key, s.trim());
+          }
+          return p;
+        },
+        { replace: true },
+      );
+    },
+    [setSearchParams],
+  );
+
   const [list, setList] = useState([]);
   const [meta, setMeta] = useState({
     sizes: [],
@@ -26,11 +53,6 @@ export default function Cats() {
     minYearsOptions: [],
   });
   const [busy, setBusy] = useState(true);
-  const [q, setQ] = useState("");
-  const [sz, setSz] = useState("");
-  const [act, setAct] = useState("");
-  const [coat, setCoat] = useState("");
-  const [years, setYears] = useState("");
   const [panel, setPanel] = useState(false);
   const [menu, setMenu] = useState(null);
   const [bad, setBad] = useState(false);
@@ -38,6 +60,8 @@ export default function Cats() {
   const [metaBad, setMetaBad] = useState(false);
 
   useListScrollRestoration("pets:scroll:/cats", !busy);
+
+  const listReturnPath = `${location.pathname}${location.search}`;
 
   const szList = meta.sizes.length > 0 ? meta.sizes : defSizes;
   const sizeOpts = szList.map((s) => ({ value: s, label: s }));
@@ -120,10 +144,12 @@ export default function Cats() {
   if (years) nActive++;
 
   function reset() {
-    setSz("");
-    setAct("");
-    setCoat("");
-    setYears("");
+    patchSearch({
+      size: "",
+      activity: "",
+      coat: "",
+      minYears: "",
+    });
   }
 
   const emptySearch = !busy && !bad && list.length > 0 && shown.length === 0;
@@ -143,7 +169,7 @@ export default function Cats() {
             autoComplete="off"
             placeholder="Начните вводить название породы кошки..."
             value={q}
-            onChange={(e) => setQ(e.target.value)}
+            onChange={(e) => patchSearch({ q: e.target.value })}
             className="w-full pl-10 pr-4 py-2.5 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
             aria-label="Поиск по названию породы кошки"
           />
@@ -193,7 +219,7 @@ export default function Cats() {
               value={sz}
               placeholder="Все размеры"
               options={sizeOpts}
-              onChange={setSz}
+              onChange={(v) => patchSearch({ size: v })}
               disabled={false}
             />
             <FilterDrop
@@ -204,7 +230,7 @@ export default function Cats() {
               value={act}
               placeholder="Любая активность"
               options={actOpts}
-              onChange={setAct}
+              onChange={(v) => patchSearch({ activity: v })}
               disabled={false}
             />
             <FilterDrop
@@ -215,7 +241,7 @@ export default function Cats() {
               value={coat}
               placeholder={coatOpts.length ? "Все типы" : "Нет данных из БД"}
               options={coatOpts}
-              onChange={setCoat}
+              onChange={(v) => patchSearch({ coat: v })}
               disabled={!coatOpts.length}
             />
             <FilterDrop
@@ -226,7 +252,7 @@ export default function Cats() {
               value={years}
               placeholder={yearsOpts.length ? "Любой срок" : "Нет данных из БД"}
               options={yearsOpts}
-              onChange={setYears}
+              onChange={(v) => patchSearch({ minYears: v })}
               disabled={!yearsOpts.length}
             />
           </div>
@@ -262,6 +288,7 @@ export default function Cats() {
             <Link
               key={cat.id}
               to={"/cats/" + cat.id}
+              state={{ listReturn: listReturnPath }}
               className="group block bg-white rounded-xl border border-stone-200 overflow-hidden shadow-sm hover:shadow-md hover:border-teal-200 transition"
             >
               <div className="h-52 sm:h-56 flex items-center justify-center overflow-hidden bg-stone-100">
