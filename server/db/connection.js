@@ -1,7 +1,7 @@
-import initSqlJs from 'sql.js';
-import { readFileSync, writeFileSync, existsSync } from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import initSqlJs from "sql.js";
+import { readFileSync, writeFileSync, existsSync } from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const dir = path.dirname(fileURLToPath(import.meta.url));
 
@@ -9,11 +9,11 @@ const dir = path.dirname(fileURLToPath(import.meta.url));
 function resolveDbFilePath() {
   if (process.env.PETS_DB_PATH) return path.resolve(process.env.PETS_DB_PATH);
   try {
-    if (existsSync('/data')) return path.join('/data', 'pets.db');
+    if (existsSync("/data")) return path.join("/data", "pets.db");
   } catch {
     void 0;
   }
-  return path.join(dir, 'pets.db');
+  return path.join(dir, "pets.db");
 }
 
 const file = resolveDbFilePath();
@@ -23,15 +23,22 @@ let cache = null;
 // один раз поднимаем wasm sql js дальше отдаём тот же объект базы из памяти
 export default async function openDb() {
   if (cache) return cache;
-  const wasm = path.join(dir, '..', 'node_modules', 'sql.js', 'dist', 'sql-wasm.wasm');
-  const SQL = await initSqlJs({ locateFile: () => wasm });
+  const wasm = path.join(
+    dir,
+    "..",
+    "node_modules",
+    "sql.js",
+    "dist",
+    "sql-wasm.wasm",
+  );
+  const sqlJs = await initSqlJs({ locateFile: () => wasm });
   let db;
   if (existsSync(file)) {
-    db = new SQL.Database(readFileSync(file));
+    db = new sqlJs.Database(readFileSync(file));
   } else {
     // первый запуск создаём пустую схему из sql файла и сразу пишем на диск
-    db = new SQL.Database();
-    db.exec(readFileSync(path.join(dir, 'schema.sql'), 'utf-8'));
+    db = new sqlJs.Database();
+    db.exec(readFileSync(path.join(dir, "schema.sql"), "utf-8"));
     writeFileSync(file, Buffer.from(db.export()));
   }
   // подтянуть старые базы к текущей схеме без ручного пересоздания файла
@@ -46,44 +53,50 @@ export default async function openDb() {
 
 // если в старой базе нет cover_type добавляем колонку и сохраняем файл
 function catCoverCol(db) {
-  const st = db.prepare('pragma table_info(cat_breeds)');
+  const st = db.prepare("pragma table_info(cat_breeds)");
   const cols = [];
   while (st.step()) cols.push(st.getAsObject());
   st.free();
-  if (cols.some((c) => c.name === 'cover_type')) return;
-  db.exec("alter table cat_breeds add column cover_type text not null default ''");
+  if (cols.some((c) => c.name === "cover_type")) return;
+  db.exec(
+    "alter table cat_breeds add column cover_type text not null default ''",
+  );
   writeFileSync(file, Buffer.from(db.export()));
 }
 
 // то же для поля nutrition у собак
 function dogNutritionCol(db) {
-  const st = db.prepare('pragma table_info(dog_breeds)');
+  const st = db.prepare("pragma table_info(dog_breeds)");
   const cols = [];
   while (st.step()) cols.push(st.getAsObject());
   st.free();
-  if (cols.some((c) => c.name === 'nutrition')) return;
-  db.exec("alter table dog_breeds add column nutrition text not null default ''");
+  if (cols.some((c) => c.name === "nutrition")) return;
+  db.exec(
+    "alter table dog_breeds add column nutrition text not null default ''",
+  );
   writeFileSync(file, Buffer.from(db.export()));
 }
 
 // вытащить текст create table из служебной таблицы sqlite чтобы понять версию схемы
 function tableSql(db, name) {
-  const st = db.prepare("select sql from sqlite_master where type='table' and name=?");
+  const st = db.prepare(
+    "select sql from sqlite_master where type='table' and name=?",
+  );
   st.bind([name]);
   if (!st.step()) {
     st.free();
-    return '';
+    return "";
   }
   const row = st.getAsObject();
   st.free();
-  return row.sql || '';
+  return row.sql || "";
 }
 
 // раньше активность хранилась как низкий средний высокий переделываем на низкая средняя высокая через новую таблицу
 function fixActivity(db) {
-  const dogOld = tableSql(db, 'dog_breeds');
-  const catOld = tableSql(db, 'cat_breeds');
-  if (dogOld.includes("'низкий'") && dogOld.includes('dog_breeds')) {
+  const dogOld = tableSql(db, "dog_breeds");
+  const catOld = tableSql(db, "cat_breeds");
+  if (dogOld.includes("'низкий'") && dogOld.includes("dog_breeds")) {
     db.exec(`
       create table dog_breeds_new (
         id integer primary key autoincrement,
@@ -109,7 +122,7 @@ function fixActivity(db) {
       create index if not exists idx_dog_activity on dog_breeds(activity);
     `);
   }
-  if (catOld.includes("'низкий'") && catOld.includes('cat_breeds')) {
+  if (catOld.includes("'низкий'") && catOld.includes("cat_breeds")) {
     db.exec(`
       create table cat_breeds_new (
         id integer primary key autoincrement,

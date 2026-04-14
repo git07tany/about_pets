@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, Cat } from 'lucide-react';
-import CatImage from '../components/CatImage';
+import { useState, useEffect } from "react";
+import { Link, useParams } from "react-router-dom";
+import { ArrowLeft, Cat } from "lucide-react";
+import CatImage from "../components/CatImage";
 
-const API = '/api';
+const apiBase = "/api";
 
 export default function CatDetail() {
   const { id } = useParams();
@@ -14,9 +14,9 @@ export default function CatDetail() {
   useEffect(() => {
     setLoading(true);
     setError(false);
-    fetch(API + '/cats/' + id)
+    fetch(apiBase + "/cats/" + id)
       .then((res) => {
-        if (!res.ok) throw new Error('Не найдено');
+        if (!res.ok) throw new Error("Не найдено");
         return res.json();
       })
       .then((data) => {
@@ -48,19 +48,19 @@ export default function CatDetail() {
 
   const blocks = [
     {
-      title: 'Шерсть и тип покрова',
+      title: "Шерсть и тип покрова",
       text: null,
       coatBlock: true,
     },
-    { title: 'Характер', text: cat.character_traits },
+    { title: "Характер", text: cat.character_traits },
     {
-      title: 'Продолжительность жизни',
+      title: "Продолжительность жизни",
       text: `В среднем около ${cat.lifespan_min}-${cat.lifespan_max} лет`,
     },
-    { title: 'Активность', text: cat.activity },
-    { title: 'Питание', text: cat.nutrition },
-    { title: 'Уход и содержание', text: cat.care },
-    { title: 'Здоровье и предрасположенности', text: cat.health },
+    { title: "Активность", text: cat.activity },
+    { title: "Питание", text: cat.nutrition },
+    { title: "Уход и содержание", text: cat.care },
+    { title: "Здоровье и предрасположенности", text: cat.health },
   ];
 
   return (
@@ -69,13 +69,15 @@ export default function CatDetail() {
         to="/cats"
         className="inline-flex items-center gap-1 text-stone-600 hover:text-teal-600 text-sm mb-6"
       >
-        <ArrowLeft className="w-4 h-4" />
-        К списку пород
+        <ArrowLeft className="w-4 h-4" />К списку пород
       </Link>
 
       <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm">
         <div className="h-56 sm:h-72 flex items-center justify-center overflow-hidden bg-stone-100">
-          <CatImage cat={cat} className="max-w-full max-h-full w-full h-full object-contain" />
+          <CatImage
+            cat={cat}
+            className="max-w-full max-h-full w-full h-full object-contain"
+          />
         </div>
         <div className="p-6 sm:p-8">
           <h1 className="text-2xl font-bold text-stone-900 flex items-center gap-2 mb-1">
@@ -90,20 +92,28 @@ export default function CatDetail() {
                 key={block.title}
                 className="border-b border-stone-100 pb-6 last:border-0 last:pb-0"
               >
-                <h2 className="text-lg font-semibold text-stone-800 mb-2">{block.title}</h2>
+                <h2 className="text-lg font-semibold text-stone-800 mb-2">
+                  {block.title}
+                </h2>
                 {block.coatBlock ? (
                   <div className="text-stone-600 text-[15px] leading-relaxed space-y-3">
                     <p>
-                      <span className="font-medium text-stone-700">Шерсть: </span>
+                      <span className="font-medium text-stone-700">
+                        Шерсть:{" "}
+                      </span>
                       {cat.coat}
                     </p>
                     <p>
-                      <span className="font-medium text-stone-700">Тип покрова: </span>
-                      {cat.cover_type || '-'}
+                      <span className="font-medium text-stone-700">
+                        Тип покрова:{" "}
+                      </span>
+                      {cat.cover_type || "-"}
                     </p>
                   </div>
                 ) : (
-                  <p className="text-stone-600 text-[15px] leading-relaxed">{block.text}</p>
+                  <p className="text-stone-600 text-[15px] leading-relaxed">
+                    {block.text}
+                  </p>
                 )}
               </section>
             ))}

@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, Rabbit } from 'lucide-react';
-import SmallPetImage from '../components/SmallPetImage';
-import { careText } from '../labels';
+import { useState, useEffect } from "react";
+import { Link, useParams } from "react-router-dom";
+import { ArrowLeft, Rabbit } from "lucide-react";
+import SmallPetImage from "../components/SmallPetImage";
+import { careText } from "../labels";
 
-const API = '/api';
+const apiBase = "/api";
 
 export default function RodentDetail() {
   const { id } = useParams();
@@ -15,9 +15,9 @@ export default function RodentDetail() {
   useEffect(() => {
     setLoading(true);
     setError(false);
-    fetch(API + '/small-pets/' + id)
+    fetch(apiBase + "/small-pets/" + id)
       .then((res) => {
-        if (!res.ok) throw new Error('нет');
+        if (!res.ok) throw new Error("нет");
         return res.json();
       })
       .then((data) => {
@@ -52,12 +52,12 @@ export default function RodentDetail() {
 
   const blocks = [
     {
-      title: 'Срок жизни',
+      title: "Срок жизни",
       text: `Обычно около ${pet.lifespan_min}-${pet.lifespan_max} лет (оценка для домашнего содержания; многое зависит от корма, стресса и ветеринарии).`,
     },
-    { title: 'Питание', text: pet.nutrition },
-    { title: 'Уход и содержание', text: pet.care },
-    { title: 'Здоровье и типичные проблемы', text: pet.health },
+    { title: "Питание", text: pet.nutrition },
+    { title: "Уход и содержание", text: pet.care },
+    { title: "Здоровье и типичные проблемы", text: pet.health },
   ];
 
   return (
@@ -66,13 +66,15 @@ export default function RodentDetail() {
         to="/rodents"
         className="inline-flex items-center gap-1 text-stone-600 hover:text-teal-600 text-sm mb-6"
       >
-        <ArrowLeft className="w-4 h-4" />
-        К списку
+        <ArrowLeft className="w-4 h-4" />К списку
       </Link>
 
       <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm">
         <div className="h-56 sm:h-64 flex items-center justify-center overflow-hidden bg-stone-100">
-          <SmallPetImage pet={pet} className="max-w-full max-h-full w-full h-full object-contain" />
+          <SmallPetImage
+            pet={pet}
+            className="max-w-full max-h-full w-full h-full object-contain"
+          />
         </div>
         <div className="p-6 sm:p-8">
           <h1 className="text-2xl font-bold text-stone-900 flex items-center gap-2 mb-2">
@@ -80,14 +82,24 @@ export default function RodentDetail() {
             {pet.name}
           </h1>
           <p className="text-stone-600 mb-8">
-            Уход: <span className="font-medium text-stone-800">{careText(pet.care_level)}</span>
+            Уход:{" "}
+            <span className="font-medium text-stone-800">
+              {careText(pet.care_level)}
+            </span>
           </p>
 
           <div className="space-y-6">
             {blocks.map((b) => (
-              <section key={b.title} className="border-b border-stone-100 pb-6 last:border-0 last:pb-0">
-                <h2 className="text-lg font-semibold text-stone-800 mb-2">{b.title}</h2>
-                <p className="text-stone-600 text-[15px] leading-relaxed whitespace-pre-wrap">{b.text}</p>
+              <section
+                key={b.title}
+                className="border-b border-stone-100 pb-6 last:border-0 last:pb-0"
+              >
+                <h2 className="text-lg font-semibold text-stone-800 mb-2">
+                  {b.title}
+                </h2>
+                <p className="text-stone-600 text-[15px] leading-relaxed whitespace-pre-wrap">
+                  {b.text}
+                </p>
               </section>
             ))}
           </div>

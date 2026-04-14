@@ -1,15 +1,15 @@
-import openDb, { save } from './connection.js';
-import { CAT_BREEDS } from './catBreedsData.mjs';
+import openDb, { save } from "./connection.js";
+import { breeds as catBreeds } from "./seed-cats-data.js";
 
-const insertSql = `INSERT INTO cat_breeds (name, size, coat, cover_type, character_traits, lifespan_min, lifespan_max, activity, nutrition, care, health, image_url)
-  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+const insertSql = `insert into cat_breeds (name, size, coat, cover_type, character_traits, lifespan_min, lifespan_max, activity, nutrition, care, health, image_url)
+  values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
 async function seed() {
   try {
     const db = await openDb();
-    db.run('DELETE FROM cat_breeds');
-    db.run("DELETE FROM sqlite_sequence WHERE name='cat_breeds'");
-    for (const b of CAT_BREEDS) {
+    db.run("delete from cat_breeds");
+    db.run("delete from sqlite_sequence where name='cat_breeds'");
+    for (const b of catBreeds) {
       db.run(insertSql, [
         b.name,
         b.size,
@@ -26,7 +26,7 @@ async function seed() {
       ]);
     }
     save(db);
-    console.log('Добавлено пород кошек:', CAT_BREEDS.length);
+    console.log("Добавлено пород кошек:", catBreeds.length);
   } catch (err) {
     console.error(err);
     process.exit(1);

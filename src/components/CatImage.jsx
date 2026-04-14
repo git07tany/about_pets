@@ -12,7 +12,7 @@ const fromAssets = import.meta.glob('../assets/cats/*.{jpg,jpeg,png,webp}', {
   eager: true,
 });
 
-// номер в имени файла это id породы чтобы быстро найти url из бандла
+// номер в имени файла это id породы чтобы быстро найти url 
 const byId = {};
 for (const path in fromAssets) {
   const m = path.match(/(\d+)\.(jpg|jpeg|png|webp)$/i);

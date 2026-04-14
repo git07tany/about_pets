@@ -1,28 +1,28 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Search, Filter, Dog, X } from 'lucide-react';
-import DogImage from '../components/DogImage';
-import FilterDrop from '../components/FilterDrop';
-import { dogSizeText } from '../labels';
-import { useListScrollRestoration } from '../hooks/useListScrollRestoration';
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { Search, Filter, Dog, X } from "lucide-react";
+import DogImage from "../components/DogImage";
+import FilterDrop from "../components/FilterDrop";
+import { dogSizeText } from "../labels";
+import { useListScrollRestoration } from "../hooks/useListScrollRestoration";
 
-const API = '/api';
+const apiBase = "/api";
 
-const DEF_SIZES = ['мелкий', 'средний', 'крупный'];
-const DEF_ACTS = ['низкая', 'средняя', 'высокая'];
-const DEF_COATS = ['Короткая', 'Полудлинная', 'Длинная', 'Бесшёрстная'];
-const DEF_AGE = [
-  { value: '6-8', label: '6-8 лет' },
-  { value: '9-10', label: '9-10 лет' },
-  { value: '10-12', label: '10-12 лет' },
-  { value: '12-14', label: '12-14 лет' },
-  { value: '14-16', label: '14-16 лет' },
-  { value: '16+', label: '16 лет и более' },
+const defSizes = ["мелкий", "средний", "крупный"];
+const defActs = ["низкая", "средняя", "высокая"];
+const defCoats = ["Короткая", "Полудлинная", "Длинная", "Бесшёрстная"];
+const defAge = [
+  { value: "6-8", label: "6-8 лет" },
+  { value: "9-10", label: "9-10 лет" },
+  { value: "10-12", label: "10-12 лет" },
+  { value: "12-14", label: "12-14 лет" },
+  { value: "14-16", label: "14-16 лет" },
+  { value: "16+", label: "16 лет и более" },
 ];
 
 function norm(s) {
-  return String(s || '')
-    .normalize('NFC')
+  return String(s || "")
+    .normalize("NFC")
     .toLowerCase();
 }
 
@@ -35,41 +35,44 @@ export default function Dogs() {
     lifespanBuckets: [],
   });
   const [busy, setBusy] = useState(true);
-  const [q, setQ] = useState('');
-  const [sz, setSz] = useState('');
-  const [act, setAct] = useState('');
-  const [coat, setCoat] = useState('');
-  const [age, setAge] = useState('');
+  const [q, setQ] = useState("");
+  const [sz, setSz] = useState("");
+  const [act, setAct] = useState("");
+  const [coat, setCoat] = useState("");
+  const [age, setAge] = useState("");
   const [panel, setPanel] = useState(false);
   const [menu, setMenu] = useState(null);
   const [bad, setBad] = useState(false);
   const [metaBusy, setMetaBusy] = useState(true);
   const [metaBad, setMetaBad] = useState(false);
 
-  useListScrollRestoration('pets:scroll:/dogs', !busy);
+  useListScrollRestoration("pets:scroll:/dogs", !busy);
 
-  const szList = meta.sizes.length > 0 ? meta.sizes : DEF_SIZES;
+  const szList = meta.sizes.length > 0 ? meta.sizes : defSizes;
   const sizeOpts = szList.map((s) => ({ value: s, label: dogSizeText(s) }));
 
-  const actList = meta.activities.length > 0 ? meta.activities : DEF_ACTS;
+  const actList = meta.activities.length > 0 ? meta.activities : defActs;
   const actOpts = actList.map((a) => ({ value: a, label: a }));
 
-  const coatList = meta.coats.length > 0 ? meta.coats : DEF_COATS;
+  const coatList = meta.coats.length > 0 ? meta.coats : defCoats;
   const coatOpts = coatList.map((c) => ({ value: c, label: c }));
 
   let ageOpts;
   if (meta.lifespanBuckets.length > 0) {
-    ageOpts = meta.lifespanBuckets.map((x) => ({ value: x.value, label: x.label }));
+    ageOpts = meta.lifespanBuckets.map((x) => ({
+      value: x.value,
+      label: x.label,
+    }));
   } else {
-    ageOpts = DEF_AGE;
+    ageOpts = defAge;
   }
 
   useEffect(() => {
     setMetaBusy(true);
     setMetaBad(false);
-    fetch(API + '/dogs/filters')
+    fetch(apiBase + "/dogs/filters")
       .then((res) => {
-        if (!res.ok) throw new Error('x');
+        if (!res.ok) throw new Error("x");
         return res.json();
       })
       .then((data) => {
@@ -99,12 +102,12 @@ export default function Dogs() {
   useEffect(() => {
     setBusy(true);
     const p = new URLSearchParams();
-    if (sz) p.set('size', sz);
-    if (act) p.set('activity', act);
-    if (coat.trim()) p.set('coat', coat.trim());
-    if (age) p.set('lifespan', age);
+    if (sz) p.set("size", sz);
+    if (act) p.set("activity", act);
+    if (coat.trim()) p.set("coat", coat.trim());
+    if (age) p.set("lifespan", age);
     setBad(false);
-    fetch(API + '/dogs?' + p.toString())
+    fetch(apiBase + "/dogs?" + p.toString())
       .then((res) => res.json())
       .then((data) => {
         setList(Array.isArray(data) ? data : []);
@@ -131,10 +134,10 @@ export default function Dogs() {
   if (age) nActive++;
 
   function reset() {
-    setSz('');
-    setAct('');
-    setCoat('');
-    setAge('');
+    setSz("");
+    setAct("");
+    setCoat("");
+    setAge("");
   }
 
   const emptySearch = !busy && !bad && list.length > 0 && shown.length === 0;
@@ -179,12 +182,20 @@ export default function Dogs() {
 
       {panel && (
         <div className="p-4 bg-white border border-stone-200 rounded-xl mb-6 space-y-4 overflow-visible">
-          {metaBusy && <p className="text-sm text-stone-600">Загрузка вариантов фильтров…</p>}
+          {metaBusy && (
+            <p className="text-sm text-stone-600">
+              Загрузка вариантов фильтров…
+            </p>
+          )}
           {metaBad && !metaBusy && (
             <p className="text-sm text-amber-800 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
-              Не удалось получить список вариантов с сервера. Проверьте, что запущен backend (папка server,{' '}
-              <code className="text-xs bg-amber-100/80 px-1 rounded">npm start</code>
-              ). Размер и активность доступны для выбора; шерсть и срок жизни появятся после успешной загрузки.
+              Не удалось получить список вариантов с сервера. Проверьте, что
+              запущен backend (папка server,{" "}
+              <code className="text-xs bg-amber-100/80 px-1 rounded">
+                npm start
+              </code>
+              ). Размер и активность доступны для выбора; шерсть и срок жизни
+              появятся после успешной загрузки.
             </p>
           )}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 overflow-visible min-w-0">
@@ -216,7 +227,7 @@ export default function Dogs() {
               setOpenMenu={setMenu}
               label="Тип шерсти"
               value={coat}
-              placeholder={coatOpts.length ? 'Все типы' : 'Нет данных из БД'}
+              placeholder={coatOpts.length ? "Все типы" : "Нет данных из БД"}
               options={coatOpts}
               onChange={setCoat}
               disabled={!coatOpts.length}
@@ -250,21 +261,23 @@ export default function Dogs() {
         <p className="text-stone-500 text-center py-8">Загрузка...</p>
       ) : bad ? (
         <p className="text-amber-700 bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
-          Не удалось загрузить данные. Убедись, что запущен сервер (из папки server: npm start).
+          Не удалось загрузить данные. Убедись, что запущен сервер (из папки
+          server: npm start).
         </p>
       ) : shown.length === 0 ? (
         <p className="text-stone-500 text-center py-8">
           {emptySearch
-            ? 'По названию ничего не найдено. Измените запрос или сбросьте фильтры.'
-            : 'Ни одной породы не найдено. Измените фильтры по характеристикам.'}
+            ? "По названию ничего не найдено. Измените запрос или сбросьте фильтры."
+            : "Ни одной породы не найдено. Измените фильтры по характеристикам."}
         </p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {shown.map((dog) => (
             <Link
               key={dog.id}
-              to={'/dogs/' + dog.id}
-              className="group block bg-white rounded-xl border border-stone-200 overflow-hidden shadow-sm hover:shadow-md hover:border-teal-200 transition">
+              to={"/dogs/" + dog.id}
+              className="group block bg-white rounded-xl border border-stone-200 overflow-hidden shadow-sm hover:shadow-md hover:border-teal-200 transition"
+            >
               <div className="h-52 sm:h-56 flex items-center justify-center overflow-hidden bg-stone-100">
                 <DogImage
                   key={dog.id}
@@ -273,8 +286,12 @@ export default function Dogs() {
                 />
               </div>
               <div className="p-3 text-center">
-                <h3 className="font-semibold text-stone-900 group-hover:text-teal-600">{dog.name}</h3>
-                <p className="text-sm text-stone-500">{dogSizeText(dog.size)}</p>
+                <h3 className="font-semibold text-stone-900 group-hover:text-teal-600">
+                  {dog.name}
+                </h3>
+                <p className="text-sm text-stone-500">
+                  {dogSizeText(dog.size)}
+                </p>
               </div>
             </Link>
           ))}

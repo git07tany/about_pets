@@ -1,31 +1,31 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Search, Rabbit } from 'lucide-react';
-import SmallPetImage from '../components/SmallPetImage';
-import { speciesText, careText } from '../labels';
-import { useListScrollRestoration } from '../hooks/useListScrollRestoration';
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { Search, Rabbit } from "lucide-react";
+import SmallPetImage from "../components/SmallPetImage";
+import { speciesText, careText } from "../labels";
+import { useListScrollRestoration } from "../hooks/useListScrollRestoration";
 
-const API = '/api';
+const apiBase = "/api";
 
-const SPECIES = [
-  { value: '', label: 'Кого ищем: все' },
-  { value: 'хомяк', label: 'Хомяки' },
-  { value: 'крыса', label: 'Крысы' },
-  { value: 'мышь', label: 'Мыши' },
-  { value: 'морская свинка', label: 'Морские свинки' },
-  { value: 'кролик', label: 'Кролики' },
+const speciesOptions = [
+  { value: "", label: "Кого ищем: все" },
+  { value: "хомяк", label: "Хомяки" },
+  { value: "крыса", label: "Крысы" },
+  { value: "мышь", label: "Мыши" },
+  { value: "морская свинка", label: "Морские свинки" },
+  { value: "кролик", label: "Кролики" },
 ];
 
-const CARE = [
-  { value: '', label: 'Уход: любой' },
-  { value: 'лёгкий', label: 'Лёгкий уход' },
-  { value: 'средний', label: 'Средний уход' },
-  { value: 'сложный', label: 'Сложный уход' },
+const careOptions = [
+  { value: "", label: "Уход: любой" },
+  { value: "лёгкий", label: "Лёгкий уход" },
+  { value: "средний", label: "Средний уход" },
+  { value: "сложный", label: "Сложный уход" },
 ];
 
 function norm(s) {
-  return String(s || '')
-    .normalize('NFC')
+  return String(s || "")
+    .normalize("NFC")
     .toLowerCase();
 }
 
@@ -33,20 +33,22 @@ export default function Rodents() {
   const [list, setList] = useState([]);
   const [busy, setBusy] = useState(true);
   const [bad, setBad] = useState(false);
-  const [q, setQ] = useState('');
-  const [sp, setSp] = useState('');
-  const [cr, setCr] = useState('');
+  const [q, setQ] = useState("");
+  const [sp, setSp] = useState("");
+  const [cr, setCr] = useState("");
 
-  useListScrollRestoration('pets:scroll:/rodents', !busy);
+  useListScrollRestoration("pets:scroll:/rodents", !busy);
 
   useEffect(() => {
     setBusy(true);
     setBad(false);
     const p = new URLSearchParams();
-    if (sp) p.set('species', sp);
-    if (cr) p.set('care', cr);
+    if (sp) p.set("species", sp);
+    if (cr) p.set("care", cr);
     const tail = p.toString();
-    const url = tail ? API + '/small-pets?' + tail : API + '/small-pets';
+    const url = tail
+      ? apiBase + "/small-pets?" + tail
+      : apiBase + "/small-pets";
     fetch(url)
       .then((res) => res.json())
       .then((data) => {
@@ -95,8 +97,8 @@ export default function Rodents() {
               onChange={(e) => setSp(e.target.value)}
               className="w-full px-3 py-2.5 border border-stone-200 rounded-lg bg-white text-stone-900 focus:ring-2 focus:ring-teal-500 focus:outline-none"
             >
-              {SPECIES.map((o) => (
-                <option key={o.value || 'all'} value={o.value}>
+              {speciesOptions.map((o) => (
+                <option key={o.value || "all"} value={o.value}>
                   {o.label}
                 </option>
               ))}
@@ -110,8 +112,8 @@ export default function Rodents() {
               onChange={(e) => setCr(e.target.value)}
               className="w-full px-3 py-2.5 border border-stone-200 rounded-lg bg-white text-stone-900 focus:ring-2 focus:ring-teal-500 focus:outline-none"
             >
-              {CARE.map((o) => (
-                <option key={o.value || 'all-care'} value={o.value}>
+              {careOptions.map((o) => (
+                <option key={o.value || "all-care"} value={o.value}>
                   {o.label}
                 </option>
               ))}
@@ -124,17 +126,22 @@ export default function Rodents() {
         <p className="text-stone-500 text-center py-8">Загрузка...</p>
       ) : bad ? (
         <p className="text-amber-800 bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
-          Не удалось загрузить данные. Запустите сервер в папке server (npm start) и выполните сид:{' '}
-          <code className="text-xs bg-white px-1 rounded">npm run seed:small-pets</code>
+          Не удалось загрузить данные. Запустите сервер в папке server (npm
+          start) и выполните сид:{" "}
+          <code className="text-xs bg-white px-1 rounded">
+            npm run seed:small-pets
+          </code>
         </p>
       ) : shown.length === 0 ? (
-        <p className="text-stone-500 text-center py-8">Ничего не найдено. Измените фильтры или поиск.</p>
+        <p className="text-stone-500 text-center py-8">
+          Ничего не найдено. Измените фильтры или поиск.
+        </p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {shown.map((pet) => (
             <Link
               key={pet.id}
-              to={'/rodents/' + pet.id}
+              to={"/rodents/" + pet.id}
               className="group block bg-white rounded-xl border border-stone-200 overflow-hidden shadow-sm hover:shadow-md hover:border-teal-200 transition"
             >
               <div className="h-48 sm:h-52 flex items-center justify-center overflow-hidden bg-stone-100">
@@ -147,8 +154,12 @@ export default function Rodents() {
                 <h2 className="font-semibold text-stone-900 text-sm sm:text-base group-hover:text-teal-600 line-clamp-2">
                   {pet.name}
                 </h2>
-                <p className="text-xs text-stone-500 mt-1">{speciesText(pet.species)}</p>
-                <p className="text-xs text-teal-700 mt-0.5">{careText(pet.care_level)}</p>
+                <p className="text-xs text-stone-500 mt-1">
+                  {speciesText(pet.species)}
+                </p>
+                <p className="text-xs text-teal-700 mt-0.5">
+                  {careText(pet.care_level)}
+                </p>
               </div>
             </Link>
           ))}

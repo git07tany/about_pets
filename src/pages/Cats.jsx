@@ -1,19 +1,19 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Search, Filter, Cat, X } from 'lucide-react';
-import CatImage from '../components/CatImage';
-import FilterDrop from '../components/FilterDrop';
-import { useListScrollRestoration } from '../hooks/useListScrollRestoration';
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { Search, Filter, Cat, X } from "lucide-react";
+import CatImage from "../components/CatImage";
+import FilterDrop from "../components/FilterDrop";
+import { useListScrollRestoration } from "../hooks/useListScrollRestoration";
 
-const API = '/api';
+const apiBase = "/api";
 
-const DEF_SIZES = ['мелкий', 'средний', 'крупный'];
-const DEF_ACTS = ['низкая', 'средняя', 'высокая'];
-const DEF_COATS = ['короткая', 'полудлинная', 'длинная', 'бесшёрстная'];
+const defSizes = ["мелкий", "средний", "крупный"];
+const defActs = ["низкая", "средняя", "высокая"];
+const defCoats = ["короткая", "полудлинная", "длинная", "бесшёрстная"];
 
 function norm(s) {
-  return String(s || '')
-    .normalize('NFC')
+  return String(s || "")
+    .normalize("NFC")
     .toLowerCase();
 }
 
@@ -26,26 +26,26 @@ export default function Cats() {
     minYearsOptions: [],
   });
   const [busy, setBusy] = useState(true);
-  const [q, setQ] = useState('');
-  const [sz, setSz] = useState('');
-  const [act, setAct] = useState('');
-  const [coat, setCoat] = useState('');
-  const [years, setYears] = useState('');
+  const [q, setQ] = useState("");
+  const [sz, setSz] = useState("");
+  const [act, setAct] = useState("");
+  const [coat, setCoat] = useState("");
+  const [years, setYears] = useState("");
   const [panel, setPanel] = useState(false);
   const [menu, setMenu] = useState(null);
   const [bad, setBad] = useState(false);
   const [metaBusy, setMetaBusy] = useState(true);
   const [metaBad, setMetaBad] = useState(false);
 
-  useListScrollRestoration('pets:scroll:/cats', !busy);
+  useListScrollRestoration("pets:scroll:/cats", !busy);
 
-  const szList = meta.sizes.length > 0 ? meta.sizes : DEF_SIZES;
+  const szList = meta.sizes.length > 0 ? meta.sizes : defSizes;
   const sizeOpts = szList.map((s) => ({ value: s, label: s }));
 
-  const actList = meta.activities.length > 0 ? meta.activities : DEF_ACTS;
+  const actList = meta.activities.length > 0 ? meta.activities : defActs;
   const actOpts = actList.map((a) => ({ value: a, label: a }));
 
-  const coatList = meta.coats.length > 0 ? meta.coats : DEF_COATS;
+  const coatList = meta.coats.length > 0 ? meta.coats : defCoats;
   const coatOpts = coatList.map((c) => ({ value: c, label: c }));
 
   const yearsOpts = (meta.minYearsOptions || []).map((y) => ({
@@ -56,9 +56,9 @@ export default function Cats() {
   useEffect(() => {
     setMetaBusy(true);
     setMetaBad(false);
-    fetch(API + '/cats/filters')
+    fetch(apiBase + "/cats/filters")
       .then((res) => {
-        if (!res.ok) throw new Error('x');
+        if (!res.ok) throw new Error("x");
         return res.json();
       })
       .then((data) => {
@@ -88,12 +88,12 @@ export default function Cats() {
   useEffect(() => {
     setBusy(true);
     const p = new URLSearchParams();
-    if (sz) p.set('size', sz);
-    if (act) p.set('activity', act);
-    if (coat.trim()) p.set('coat', coat.trim());
-    if (years) p.set('minYears', years);
+    if (sz) p.set("size", sz);
+    if (act) p.set("activity", act);
+    if (coat.trim()) p.set("coat", coat.trim());
+    if (years) p.set("minYears", years);
     setBad(false);
-    fetch(API + '/cats?' + p.toString())
+    fetch(apiBase + "/cats?" + p.toString())
       .then((res) => res.json())
       .then((data) => {
         setList(Array.isArray(data) ? data : []);
@@ -120,10 +120,10 @@ export default function Cats() {
   if (years) nActive++;
 
   function reset() {
-    setSz('');
-    setAct('');
-    setCoat('');
-    setYears('');
+    setSz("");
+    setAct("");
+    setCoat("");
+    setYears("");
   }
 
   const emptySearch = !busy && !bad && list.length > 0 && shown.length === 0;
@@ -168,12 +168,20 @@ export default function Cats() {
 
       {panel && (
         <div className="p-4 bg-white border border-stone-200 rounded-xl mb-6 space-y-4 overflow-visible">
-          {metaBusy && <p className="text-sm text-stone-600">Загрузка вариантов фильтров…</p>}
+          {metaBusy && (
+            <p className="text-sm text-stone-600">
+              Загрузка вариантов фильтров…
+            </p>
+          )}
           {metaBad && !metaBusy && (
             <p className="text-sm text-amber-800 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
-              Не удалось получить список вариантов с сервера. Проверьте, что запущен backend (папка server,{' '}
-              <code className="text-xs bg-amber-100/80 px-1 rounded">npm start</code>
-              ). Размер и активность доступны для выбора; шерсть и срок жизни появятся после успешной загрузки.
+              Не удалось получить список вариантов с сервера. Проверьте, что
+              запущен backend (папка server,{" "}
+              <code className="text-xs bg-amber-100/80 px-1 rounded">
+                npm start
+              </code>
+              ). Размер и активность доступны для выбора; шерсть и срок жизни
+              появятся после успешной загрузки.
             </p>
           )}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 overflow-visible min-w-0">
@@ -205,7 +213,7 @@ export default function Cats() {
               setOpenMenu={setMenu}
               label="Тип шерсти"
               value={coat}
-              placeholder={coatOpts.length ? 'Все типы' : 'Нет данных из БД'}
+              placeholder={coatOpts.length ? "Все типы" : "Нет данных из БД"}
               options={coatOpts}
               onChange={setCoat}
               disabled={!coatOpts.length}
@@ -216,7 +224,7 @@ export default function Cats() {
               setOpenMenu={setMenu}
               label="Срок жизни (не менее)"
               value={years}
-              placeholder={yearsOpts.length ? 'Любой срок' : 'Нет данных из БД'}
+              placeholder={yearsOpts.length ? "Любой срок" : "Нет данных из БД"}
               options={yearsOpts}
               onChange={setYears}
               disabled={!yearsOpts.length}
@@ -239,21 +247,23 @@ export default function Cats() {
         <p className="text-stone-500 text-center py-8">Загрузка...</p>
       ) : bad ? (
         <p className="text-amber-700 bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
-          Не удалось загрузить данные. Убедись, что запущен сервер (из папки server: npm start).
+          Не удалось загрузить данные. Убедись, что запущен сервер (из папки
+          server: npm start).
         </p>
       ) : shown.length === 0 ? (
         <p className="text-stone-500 text-center py-8">
           {emptySearch
-            ? 'По названию ничего не найдено. Измените запрос или сбросьте фильтры.'
-            : 'Ни одной породы не найдено. Измените фильтры по характеристикам.'}
+            ? "По названию ничего не найдено. Измените запрос или сбросьте фильтры."
+            : "Ни одной породы не найдено. Измените фильтры по характеристикам."}
         </p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {shown.map((cat) => (
             <Link
               key={cat.id}
-              to={'/cats/' + cat.id}
-              className="group block bg-white rounded-xl border border-stone-200 overflow-hidden shadow-sm hover:shadow-md hover:border-teal-200 transition">
+              to={"/cats/" + cat.id}
+              className="group block bg-white rounded-xl border border-stone-200 overflow-hidden shadow-sm hover:shadow-md hover:border-teal-200 transition"
+            >
               <div className="h-52 sm:h-56 flex items-center justify-center overflow-hidden bg-stone-100">
                 <CatImage
                   key={cat.id}
@@ -262,7 +272,9 @@ export default function Cats() {
                 />
               </div>
               <div className="p-3 text-center">
-                <h3 className="font-semibold text-stone-900 group-hover:text-teal-600">{cat.name}</h3>
+                <h3 className="font-semibold text-stone-900 group-hover:text-teal-600">
+                  {cat.name}
+                </h3>
                 <p className="text-sm text-stone-500">{cat.size}</p>
               </div>
             </Link>
