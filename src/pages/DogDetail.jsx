@@ -78,6 +78,8 @@ export default function DogDetail() {
         <div className="h-56 sm:h-72 flex items-center justify-center overflow-hidden bg-stone-100">
           <DogImage
             dog={dog}
+            loading="eager"
+            fetchPriority="high"
             className="max-w-full max-h-full w-full h-full object-contain"
           />
         </div>

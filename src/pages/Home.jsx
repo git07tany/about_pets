@@ -49,7 +49,7 @@ export default function Home() {
       <section className="max-w-5xl mx-auto px-4 pb-16">
         <h2 className="text-xl font-semibold text-stone-800 mb-6 text-center">Выберите категорию</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {categories.map((item) => (
+          {categories.map((item, index) => (
             <Link
               key={item.name}
               to={item.link}
@@ -58,7 +58,11 @@ export default function Home() {
                 <img
                   src={item.img}
                   alt={item.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition duration-300"/>
+                  loading={index === 0 ? 'eager' : 'lazy'}
+                  decoding="async"
+                  fetchPriority={index === 0 ? 'high' : undefined}
+                  className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                />
               </div>
               <div className="p-4 flex items-center gap-3">
                 <item.icon className="w-6 h-6 text-teal-600 shrink-0" />

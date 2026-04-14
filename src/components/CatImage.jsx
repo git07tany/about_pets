@@ -36,7 +36,12 @@ function urlsFor(id) {
   return out;
 }
 
-export default function CatImage({ cat, className }) {
+export default function CatImage({
+  cat,
+  className,
+  loading = 'lazy',
+  fetchPriority,
+}) {
   const id = cat && cat.id != null ? String(cat.id) : '';
   const [i, setI] = useState(0);
 
@@ -56,10 +61,28 @@ export default function CatImage({ cat, className }) {
   }
 
   if (!id) {
-    return <img src={PH} alt="" className={className} />;
+    return (
+      <img
+        src={PH}
+        alt=""
+        className={className}
+        loading={loading}
+        decoding="async"
+      />
+    );
   }
 
   const name = cat && cat.name ? cat.name : '';
 
-  return <img src={src} alt={name} className={className} onError={onBad} />;
+  return (
+    <img
+      src={src}
+      alt={name}
+      className={className}
+      loading={loading}
+      decoding="async"
+      fetchPriority={fetchPriority}
+      onError={onBad}
+    />
+  );
 }

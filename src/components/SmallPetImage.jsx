@@ -16,7 +16,12 @@ function pubUrl(raw) {
   return t.startsWith('/') ? t : '/' + t;
 }
 
-export default function SmallPetImage({ pet, className }) {
+export default function SmallPetImage({
+  pet,
+  className,
+  loading = 'lazy',
+  fetchPriority,
+}) {
   const src = pubUrl(pet && pet.image_url);
   const [bad, setBad] = useState(false);
 
@@ -26,12 +31,28 @@ export default function SmallPetImage({ pet, className }) {
   }, [src]);
 
   if (!src || bad) {
-    return <img src={PH} alt="" className={className} />;
+    return (
+      <img
+        src={PH}
+        alt=""
+        className={className}
+        loading={loading}
+        decoding="async"
+      />
+    );
   }
 
   const name = pet && pet.name ? pet.name : '';
 
   return (
-    <img src={src} alt={name} className={className} onError={() => setBad(true)} />
+    <img
+      src={src}
+      alt={name}
+      className={className}
+      loading={loading}
+      decoding="async"
+      fetchPriority={fetchPriority}
+      onError={() => setBad(true)}
+    />
   );
 }

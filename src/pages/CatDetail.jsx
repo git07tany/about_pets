@@ -76,6 +76,8 @@ export default function CatDetail() {
         <div className="h-56 sm:h-72 flex items-center justify-center overflow-hidden bg-stone-100">
           <CatImage
             cat={cat}
+            loading="eager"
+            fetchPriority="high"
             className="max-w-full max-h-full w-full h-full object-contain"
           />
         </div>

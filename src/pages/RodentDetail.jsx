@@ -73,6 +73,8 @@ export default function RodentDetail() {
         <div className="h-56 sm:h-64 flex items-center justify-center overflow-hidden bg-stone-100">
           <SmallPetImage
             pet={pet}
+            loading="eager"
+            fetchPriority="high"
             className="max-w-full max-h-full w-full h-full object-contain"
           />
         </div>
