@@ -71,6 +71,7 @@ export default function Dogs() {
   useListScrollRestoration("pets:scroll:/dogs", !busy);
 
   const listReturnPath = `${location.pathname}${location.search}`;
+  const scrollToCardKey = "pets:scrollToCard:/dogs";
 
   const szList = meta.sizes.length > 0 ? meta.sizes : defSizes;
   const sizeOpts = szList.map((s) => ({ value: s, label: dogSizeText(s) }));
@@ -150,6 +151,16 @@ export default function Dogs() {
     const needle = norm(qq);
     shown = list.filter((d) => norm(d.name).includes(needle));
   }
+
+  // чтобы при возврате со страницы карточки возвращаться именно к ней обратно
+  useEffect(() => {
+    if (busy) return;
+    const pendingId = sessionStorage.getItem(scrollToCardKey);
+    if (!pendingId) return;
+    const el = document.getElementById(`card-dog-${pendingId}`);
+    if (el) el.scrollIntoView({ block: "center" });
+    sessionStorage.removeItem(scrollToCardKey);
+  }, [busy, shown.length, scrollToCardKey]);
 
   let nActive = 0;
   if (sz) nActive++;
@@ -303,6 +314,13 @@ export default function Dogs() {
               key={dog.id}
               to={"/dogs/" + dog.id}
               state={{ listReturn: listReturnPath }}
+              id={"card-dog-" + dog.id}
+              onClick={() =>
+                sessionStorage.setItem(
+                  scrollToCardKey,
+                  String(dog.id),
+                )
+              }
               className="group block bg-white rounded-xl border border-stone-200 overflow-hidden shadow-sm hover:shadow-md hover:border-teal-200 transition"
             >
               <div className="h-52 sm:h-56 flex items-center justify-center overflow-hidden bg-stone-100">

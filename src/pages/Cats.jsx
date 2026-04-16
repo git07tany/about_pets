@@ -62,6 +62,8 @@ export default function Cats() {
   useListScrollRestoration("pets:scroll:/cats", !busy);
 
   const listReturnPath = `${location.pathname}${location.search}`;
+  const scrollToCardKey = "pets:scrollToCard:/cats";
+  const returnPathKey = "pets:returnPath:/cats";
 
   const szList = meta.sizes.length > 0 ? meta.sizes : defSizes;
   const sizeOpts = szList.map((s) => ({ value: s, label: s }));
@@ -136,6 +138,16 @@ export default function Cats() {
     const needle = norm(qq);
     shown = list.filter((d) => norm(d.name).includes(needle));
   }
+
+  // чтобы при возврате со страницы детали возвращаться к нужной карточке
+  useEffect(() => {
+    if (busy) return;
+    const pendingId = sessionStorage.getItem(scrollToCardKey);
+    if (!pendingId) return;
+    const el = document.getElementById(`card-cat-${pendingId}`);
+    if (el) el.scrollIntoView({ block: "center" });
+    sessionStorage.removeItem(scrollToCardKey);
+  }, [busy, shown.length, scrollToCardKey]);
 
   let nActive = 0;
   if (sz) nActive++;
@@ -289,6 +301,13 @@ export default function Cats() {
               key={cat.id}
               to={"/cats/" + cat.id}
               state={{ listReturn: listReturnPath }}
+              id={"card-cat-" + cat.id}
+              onClick={() =>
+                (() => {
+                  sessionStorage.setItem(scrollToCardKey, String(cat.id));
+                  sessionStorage.setItem(returnPathKey, listReturnPath);
+                })()
+              }
               className="group block bg-white rounded-xl border border-stone-200 overflow-hidden shadow-sm hover:shadow-md hover:border-teal-200 transition"
             >
               <div className="h-52 sm:h-56 flex items-center justify-center overflow-hidden bg-stone-100">

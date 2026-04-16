@@ -8,6 +8,11 @@ const apiBase = "/api";
 
 export default function RodentDetail() {
   const { id } = useParams();
+  const location = useLocation();
+  const listBack =
+    typeof location.state?.listReturn === "string"
+      ? location.state.listReturn
+      : "/rodents";
   const [pet, setPet] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);

@@ -11,7 +11,7 @@ export default function CatDetail() {
   const listBack =
     typeof location.state?.listReturn === "string"
       ? location.state.listReturn
-      : "/cats";
+      : sessionStorage.getItem("pets:returnPath:/cats") || "/cats";
   const [cat, setCat] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);

@@ -62,6 +62,7 @@ export default function Rodents() {
   useListScrollRestoration("pets:scroll:/rodents", !busy);
 
   const listReturnPath = `${location.pathname}${location.search}`;
+  const scrollToCardKey = "pets:scrollToCard:/rodents";
 
   useEffect(() => {
     setBusy(true);
@@ -92,6 +93,16 @@ export default function Rodents() {
     const needle = norm(qq);
     shown = list.filter((p) => norm(p.name).includes(needle));
   }
+
+  // чтобы при возврате со страницы детали возвращаться к нужной карточке
+  useEffect(() => {
+    if (busy) return;
+    const pendingId = sessionStorage.getItem(scrollToCardKey);
+    if (!pendingId) return;
+    const el = document.getElementById(`card-pet-${pendingId}`);
+    if (el) el.scrollIntoView({ block: "center" });
+    sessionStorage.removeItem(scrollToCardKey);
+  }, [busy, shown.length, scrollToCardKey]);
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
@@ -167,6 +178,13 @@ export default function Rodents() {
               key={pet.id}
               to={"/rodents/" + pet.id}
               state={{ listReturn: listReturnPath }}
+              id={"card-pet-" + pet.id}
+              onClick={() =>
+                sessionStorage.setItem(
+                  scrollToCardKey,
+                  String(pet.id),
+                )
+              }
               className="group block bg-white rounded-xl border border-stone-200 overflow-hidden shadow-sm hover:shadow-md hover:border-teal-200 transition"
             >
               <div className="h-48 sm:h-52 flex items-center justify-center overflow-hidden bg-stone-100">

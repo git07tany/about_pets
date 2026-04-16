@@ -5,6 +5,7 @@ import { useEffect, useRef } from 'react';
 export function useListScrollRestoration(storageKey, ready) {
   const pendingY = useRef(null);
   const restored = useRef(false);
+  const lastY = useRef(null);
 
   // прочитать сохранённую позицию при монтировании
   useEffect(() => {
@@ -27,14 +28,16 @@ export function useListScrollRestoration(storageKey, ready) {
     });
   }, [ready, storageKey]);
 
-  // пока на странице пишем y в storage при скролле и при уходе сохраняем последнее
+  // пока на странице пишем y в storage при скролле и при уходе сохраняет последнее
   useEffect(() => {
     let ticking = false;
     const onScroll = () => {
       if (!ticking) {
         ticking = true;
         requestAnimationFrame(() => {
-          sessionStorage.setItem(storageKey, String(Math.round(window.scrollY)));
+          const y = Math.round(window.scrollY);
+          lastY.current = y;
+          sessionStorage.setItem(storageKey, String(y));
           ticking = false;
         });
       }
@@ -42,7 +45,10 @@ export function useListScrollRestoration(storageKey, ready) {
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => {
       window.removeEventListener('scroll', onScroll);
-      sessionStorage.setItem(storageKey, String(Math.round(window.scrollY)));
+      //  при навигации браузер может сначала “скроллить наверх”, поэтому нельзя брать window.scrollY прямо в момент размонтирования
+      if (lastY.current != null) {
+        sessionStorage.setItem(storageKey, String(lastY.current));
+      }
     };
   }, [storageKey]);
 }

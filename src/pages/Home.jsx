@@ -30,7 +30,6 @@ export default function Home() {
     { icon: BookOpen, title: 'Породы', desc: 'Сравнение пород, характер, размер' },
     { icon: Heart, title: 'Уход', desc: 'Кормление, гигиена, обустройство' },
     { icon: Stethoscope, title: 'Здоровье', desc: 'Болезни, прививки, симптомы' },
-    { icon: Sparkles, title: 'Поведение', desc: 'Дрессировка и коррекция поведения' },
   ];
 
   return (
@@ -79,7 +78,7 @@ export default function Home() {
       <section className="bg-white border-y border-stone-200 py-12">
         <div className="max-w-5xl mx-auto px-4">
           <h2 className="text-xl font-semibold text-stone-800 mb-8 text-center">Что вы найдёте на сайте</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
             {blocks.map((item) => (
               <div key={item.title} className="text-center p-4">
                 <div className="inline-flex p-3 rounded-xl bg-teal-50 text-teal-600 mb-3">
